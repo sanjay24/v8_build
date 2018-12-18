@@ -1,0 +1,302 @@
+rule cc
+  command = ../../third_party/llvm-build/Release+Asserts/bin/clang-cl.exe /nologo /showIncludes  "-imsvc..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\ATLMFC\include" "-imsvc..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\include" "-imsvc..\..\..\..\..\..\..\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\include\um" "-imsvc..\..\..\..\..\..\..\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\ucrt" "-imsvc..\..\..\..\..\..\..\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\shared" "-imsvc..\..\..\..\..\..\..\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\um" "-imsvc..\..\..\..\..\..\..\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\winrt" "-imsvc..\..\..\..\..\..\..\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\cppwinrt" ${defines} ${include_dirs} ${cflags} ${cflags_c} /c ${in} /Fo${out} /Fd"${target_out_dir}/${label_name}_c.pdb"
+  description = CC ${out}
+  deps = msvc
+rule cxx
+  command = ../../third_party/llvm-build/Release+Asserts/bin/clang-cl.exe /nologo /showIncludes  "-imsvc..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\ATLMFC\include" "-imsvc..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\include" "-imsvc..\..\..\..\..\..\..\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\include\um" "-imsvc..\..\..\..\..\..\..\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\ucrt" "-imsvc..\..\..\..\..\..\..\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\shared" "-imsvc..\..\..\..\..\..\..\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\um" "-imsvc..\..\..\..\..\..\..\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\winrt" "-imsvc..\..\..\..\..\..\..\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\cppwinrt" ${defines} ${include_dirs} ${cflags} ${cflags_cc} /c ${in} /Fo${out} /Fd"${target_out_dir}/${label_name}_cc.pdb"
+  description = CXX ${out}
+  deps = msvc
+rule rc
+  command = C:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../build/toolchain/win/tool_wrapper.py rc-wrapper environment.x64 rc.exe /nologo ${defines} ${include_dirs} /fo${out} ${in}
+  description = RC ${out}
+  deps = msvc
+rule asm
+  command = C:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../build/toolchain/win/tool_wrapper.py asm-wrapper environment.x64 C:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../build/toolchain/win/ml.py ml64.exe /nologo ${defines} ${include_dirs} ${asmflags} /c /Fo${out} ${in}
+  description = ASM ${out}
+rule alink
+  command = ninja -t msvc -e environment.x64 -- ../../third_party/llvm-build/Release+Asserts/bin/lld-link.exe /lib /nologo ${arflags} /OUT:${out} @${out}.rsp
+  description = LIB ${out}
+  rspfile = ${out}.rsp
+  rspfile_content = ${in_newline}
+rule solink
+  command = ninja -t msvc -e environment.x64 -- ../../third_party/llvm-build/Release+Asserts/bin/lld-link.exe /nologo /IMPLIB:${output_dir}/${target_output_name}${output_extension}.lib /DLL /OUT:${output_dir}/${target_output_name}${output_extension} /PDB:${output_dir}/${target_output_name}${output_extension}.pdb @${output_dir}/${target_output_name}${output_extension}.rsp
+  description = LINK(DLL) ${out}
+  rspfile = ${output_dir}/${target_output_name}${output_extension}.rsp
+  rspfile_content = ${libs} ${solibs} ${in_newline} ${ldflags}
+  pool = build_toolchain_link_pool
+  restat = 1
+rule solink_module
+  command = ninja -t msvc -e environment.x64 -- ../../third_party/llvm-build/Release+Asserts/bin/lld-link.exe /nologo /DLL /OUT:${output_dir}/${target_output_name}${output_extension} /PDB:${output_dir}/${target_output_name}${output_extension}.pdb @${output_dir}/${target_output_name}${output_extension}.rsp
+  description = LINK_MODULE(DLL) ${out}
+  rspfile = ${output_dir}/${target_output_name}${output_extension}.rsp
+  rspfile_content = ${libs} ${solibs} ${in_newline} ${ldflags}
+  pool = build_toolchain_link_pool
+rule link
+  command = ninja -t msvc -e environment.x64 -- ../../third_party/llvm-build/Release+Asserts/bin/lld-link.exe /nologo /OUT:${output_dir}/${target_output_name}${output_extension} /PDB:${output_dir}/${target_output_name}${output_extension}.pdb @${output_dir}/${target_output_name}${output_extension}.rsp
+  description = LINK ${out}
+  rspfile = ${output_dir}/${target_output_name}${output_extension}.rsp
+  rspfile_content = ${in_newline} ${libs} ${solibs} ${ldflags}
+  pool = build_toolchain_link_pool
+rule stamp
+  command = cmd /c type nul > "${out}"
+  description = STAMP ${out}
+  pool = build_toolchain_action_pool
+rule copy
+  command = C:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../build/toolchain/win/tool_wrapper.py recursive-mirror ${in} ${out}
+  description = COPY ${in} ${out}
+  pool = build_toolchain_action_pool
+
+rule ___asm_to_inline_asm_default___build_toolchain_win_win_clang_x64__rule
+  command = C$:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../tools/snapshot/asm_to_inline_asm.py gen/embedded.S gen/embedded.cc
+  description = ACTION //:asm_to_inline_asm_default(//build/toolchain/win:win_clang_x64)
+  restat = 1
+  pool = build_toolchain_action_pool
+
+build gen/embedded.cc: ___asm_to_inline_asm_default___build_toolchain_win_win_clang_x64__rule | ../../tools/snapshot/asm_to_inline_asm.py gen/embedded.S obj/run_mksnapshot_default.stamp
+
+build obj/asm_to_inline_asm_default.stamp: stamp gen/embedded.cc
+subninja obj/bytecode_builtins_list_generator.ninja
+subninja obj/d8.ninja
+rule ___d8_js2c___build_toolchain_win_win_clang_x64__rule
+  command = C$:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../tools/js2c.py gen/d8-js.cc D8 ../../src/d8.js ../../src/js/macros.py
+  description = ACTION //:d8_js2c(//build/toolchain/win:win_clang_x64)
+  restat = 1
+  pool = build_toolchain_action_pool
+
+build gen/d8-js.cc: ___d8_js2c___build_toolchain_win_win_clang_x64__rule | ../../tools/js2c.py ../../src/d8.js ../../src/js/macros.py
+
+build obj/d8_js2c.stamp: stamp gen/d8-js.cc
+subninja obj/fuzzer_support.ninja
+rule ___generate_bytecode_builtins_list___build_toolchain_win_win_clang_x64__rule
+  command = C$:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../tools/run.py ./bytecode_builtins_list_generator gen/builtins-generated/bytecodes-builtins-list.h
+  description = ACTION //:generate_bytecode_builtins_list(//build/toolchain/win:win_clang_x64)
+  restat = 1
+  pool = build_toolchain_action_pool
+
+build gen/builtins-generated/bytecodes-builtins-list.h: ___generate_bytecode_builtins_list___build_toolchain_win_win_clang_x64__rule | ../../tools/run.py ./bytecode_builtins_list_generator.exe
+
+build obj/generate_bytecode_builtins_list.stamp: stamp gen/builtins-generated/bytecodes-builtins-list.h
+build obj/gn_all.stamp: stamp ./d8.exe obj/v8_fuzzers.stamp ./v8_hello_world.exe ./v8_sample_process.exe obj/test/gn_all.stamp obj/tools/gn_all.stamp ./v8_shell.exe
+rule ___js2c___build_toolchain_win_win_clang_x64__rule
+  command = C$:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../tools/js2c.py gen/libraries.cc CORE ../../src/js/macros.py ../../src/message-template.h ../../src/js/prologue.js --startup_blob gen/libraries.bin
+  description = ACTION //:js2c(//build/toolchain/win:win_clang_x64)
+  restat = 1
+  pool = build_toolchain_action_pool
+
+build gen/libraries.cc gen/libraries.bin: ___js2c___build_toolchain_win_win_clang_x64__rule | ../../tools/js2c.py ../../tools/jsmin.py ../../src/js/macros.py ../../src/message-template.h ../../src/js/prologue.js
+
+build obj/js2c.stamp: stamp gen/libraries.cc gen/libraries.bin
+rule ___js2c_experimental_extras___build_toolchain_win_win_clang_x64__rule
+  command = C$:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../tools/js2c.py gen/experimental-extras-libraries.cc EXPERIMENTAL_EXTRAS ../../test/cctest/test-experimental-extra.js --startup_blob gen/libraries_experimental_extras.bin
+  description = ACTION //:js2c_experimental_extras(//build/toolchain/win:win_clang_x64)
+  restat = 1
+  pool = build_toolchain_action_pool
+
+build gen/experimental-extras-libraries.cc gen/libraries_experimental_extras.bin: ___js2c_experimental_extras___build_toolchain_win_win_clang_x64__rule | ../../tools/js2c.py ../../tools/jsmin.py ../../test/cctest/test-experimental-extra.js
+
+build obj/js2c_experimental_extras.stamp: stamp gen/experimental-extras-libraries.cc gen/libraries_experimental_extras.bin
+rule ___js2c_extras___build_toolchain_win_win_clang_x64__rule
+  command = C$:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../tools/js2c.py gen/extras-libraries.cc EXTRAS ../../test/cctest/test-extra.js --startup_blob gen/libraries_extras.bin
+  description = ACTION //:js2c_extras(//build/toolchain/win:win_clang_x64)
+  restat = 1
+  pool = build_toolchain_action_pool
+
+build gen/extras-libraries.cc gen/libraries_extras.bin: ___js2c_extras___build_toolchain_win_win_clang_x64__rule | ../../tools/js2c.py ../../tools/jsmin.py ../../test/cctest/test-extra.js
+
+build obj/js2c_extras.stamp: stamp gen/extras-libraries.cc gen/libraries_extras.bin
+subninja obj/json_fuzzer.ninja
+subninja obj/lib_wasm_fuzzer_common.ninja
+subninja obj/mksnapshot.ninja
+subninja obj/multi_return_fuzzer.ninja
+rule ___natives_blob___build_toolchain_win_win_clang_x64__rule
+  command = C$:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../tools/concatenate-files.py gen/libraries.bin gen/libraries_extras.bin gen/libraries_experimental_extras.bin natives_blob.bin
+  description = ACTION //:natives_blob(//build/toolchain/win:win_clang_x64)
+  restat = 1
+  pool = build_toolchain_action_pool
+
+build natives_blob.bin: ___natives_blob___build_toolchain_win_win_clang_x64__rule | ../../tools/concatenate-files.py gen/libraries.bin gen/libraries_extras.bin gen/libraries_experimental_extras.bin obj/js2c.stamp obj/js2c_experimental_extras.stamp obj/js2c_extras.stamp
+
+build obj/natives_blob.stamp: stamp natives_blob.bin
+subninja obj/parser_fuzzer.ninja
+rule ___postmortem-metadata___build_toolchain_win_win_clang_x64__rule
+  command = C$:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../tools/gen-postmortem-metadata.py gen/debug-support.cc ../../src/objects.h ../../src/objects-inl.h ../../src/objects/allocation-site-inl.h ../../src/objects/allocation-site.h ../../src/objects/cell-inl.h ../../src/objects/cell.h ../../src/objects/code-inl.h ../../src/objects/code.h ../../src/objects/data-handler.h ../../src/objects/data-handler-inl.h ../../src/objects/feedback-cell.h ../../src/objects/feedback-cell-inl.h ../../src/objects/fixed-array-inl.h ../../src/objects/fixed-array.h ../../src/objects/heap-object-inl.h ../../src/objects/heap-object.h ../../src/objects/instance-type.h ../../src/objects/js-array-inl.h ../../src/objects/js-array.h ../../src/objects/js-array-buffer-inl.h ../../src/objects/js-array-buffer.h ../../src/objects/js-objects-inl.h ../../src/objects/js-objects.h ../../src/objects/js-promise-inl.h ../../src/objects/js-promise.h ../../src/objects/js-regexp-inl.h ../../src/objects/js-regexp.h ../../src/objects/js-regexp-string-iterator-inl.h ../../src/objects/js-regexp-string-iterator.h ../../src/objects/map.h ../../src/objects/map-inl.h ../../src/objects/name.h ../../src/objects/name-inl.h ../../src/objects/scope-info.h ../../src/objects/script.h ../../src/objects/script-inl.h ../../src/objects/shared-function-info.h ../../src/objects/shared-function-info-inl.h ../../src/objects/string.h ../../src/objects/string-inl.h ../../src/objects/struct.h ../../src/objects/struct-inl.h
+  description = ACTION //:postmortem-metadata(//build/toolchain/win:win_clang_x64)
+  restat = 1
+  pool = build_toolchain_action_pool
+
+build gen/debug-support.cc: ___postmortem-metadata___build_toolchain_win_win_clang_x64__rule | ../../tools/gen-postmortem-metadata.py ../../src/objects.h ../../src/objects-inl.h ../../src/objects/allocation-site-inl.h ../../src/objects/allocation-site.h ../../src/objects/cell-inl.h ../../src/objects/cell.h ../../src/objects/code-inl.h ../../src/objects/code.h ../../src/objects/data-handler.h ../../src/objects/data-handler-inl.h ../../src/objects/feedback-cell.h ../../src/objects/feedback-cell-inl.h ../../src/objects/fixed-array-inl.h ../../src/objects/fixed-array.h ../../src/objects/heap-object-inl.h ../../src/objects/heap-object.h ../../src/objects/instance-type.h ../../src/objects/js-array-inl.h ../../src/objects/js-array.h ../../src/objects/js-array-buffer-inl.h ../../src/objects/js-array-buffer.h ../../src/objects/js-objects-inl.h ../../src/objects/js-objects.h ../../src/objects/js-promise-inl.h ../../src/objects/js-promise.h ../../src/objects/js-regexp-inl.h ../../src/objects/js-regexp.h ../../src/objects/js-regexp-string-iterator-inl.h ../../src/objects/js-regexp-string-iterator.h ../../src/objects/map.h ../../src/objects/map-inl.h ../../src/objects/name.h ../../src/objects/name-inl.h ../../src/objects/scope-info.h ../../src/objects/script.h ../../src/objects/script-inl.h ../../src/objects/shared-function-info.h ../../src/objects/shared-function-info-inl.h ../../src/objects/string.h ../../src/objects/string-inl.h ../../src/objects/struct.h ../../src/objects/struct-inl.h
+
+build obj/postmortem-metadata.stamp: stamp gen/debug-support.cc
+subninja obj/regexp_builtins_fuzzer.ninja
+subninja obj/regexp_fuzzer.ninja
+rule ___run_mksnapshot_default___build_toolchain_win_win_clang_x64__rule
+  command = C$:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../tools/run.py ./mksnapshot --turbo_instruction_scheduling --embedded_src gen/embedded.S --embedded_variant Default --random-seed 314159265 --startup_blob snapshot_blob.bin
+  description = ACTION //:run_mksnapshot_default(//build/toolchain/win:win_clang_x64)
+  restat = 1
+  pool = build_toolchain_action_pool
+
+build gen/embedded.S snapshot_blob.bin: ___run_mksnapshot_default___build_toolchain_win_win_clang_x64__rule | ../../tools/run.py ./mksnapshot.exe
+
+build obj/run_mksnapshot_default.stamp: stamp gen/embedded.S snapshot_blob.bin
+rule ___run_torque___build_toolchain_win_win_clang_x64__rule
+  command = C$:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../tools/run.py ./torque -o gen/torque-generated ../../src/builtins/base.tq ../../src/builtins/frames.tq ../../src/builtins/arguments.tq ../../src/builtins/array.tq ../../src/builtins/array-copywithin.tq ../../src/builtins/array-foreach.tq ../../src/builtins/array-join.tq ../../src/builtins/array-lastindexof.tq ../../src/builtins/array-of.tq ../../src/builtins/array-reverse.tq ../../src/builtins/array-slice.tq ../../src/builtins/array-splice.tq ../../src/builtins/array-unshift.tq ../../src/builtins/collections.tq ../../src/builtins/data-view.tq ../../src/builtins/object.tq ../../src/builtins/object-fromentries.tq ../../src/builtins/iterator.tq ../../src/builtins/typed-array.tq ../../test/torque/test-torque.tq ../../third_party/v8/builtins/array-sort.tq
+  description = ACTION //:run_torque(//build/toolchain/win:win_clang_x64)
+  restat = 1
+  pool = build_toolchain_action_pool
+
+build gen/torque-generated/builtin-definitions-from-dsl.h gen/torque-generated/builtins-base-from-dsl-gen.cc gen/torque-generated/builtins-base-from-dsl-gen.h gen/torque-generated/builtins-arguments-from-dsl-gen.cc gen/torque-generated/builtins-arguments-from-dsl-gen.h gen/torque-generated/builtins-array-from-dsl-gen.cc gen/torque-generated/builtins-array-from-dsl-gen.h gen/torque-generated/builtins-collections-from-dsl-gen.cc gen/torque-generated/builtins-collections-from-dsl-gen.h gen/torque-generated/builtins-iterator-from-dsl-gen.cc gen/torque-generated/builtins-iterator-from-dsl-gen.h gen/torque-generated/builtins-object-from-dsl-gen.cc gen/torque-generated/builtins-object-from-dsl-gen.h gen/torque-generated/builtins-typed-array-from-dsl-gen.cc gen/torque-generated/builtins-typed-array-from-dsl-gen.h gen/torque-generated/builtins-data-view-from-dsl-gen.cc gen/torque-generated/builtins-data-view-from-dsl-gen.h gen/torque-generated/builtins-test-from-dsl-gen.cc gen/torque-generated/builtins-test-from-dsl-gen.h: ___run_torque___build_toolchain_win_win_clang_x64__rule | ../../tools/run.py ../../src/builtins/base.tq ../../src/builtins/frames.tq ../../src/builtins/arguments.tq ../../src/builtins/array.tq ../../src/builtins/array-copywithin.tq ../../src/builtins/array-foreach.tq ../../src/builtins/array-join.tq ../../src/builtins/array-lastindexof.tq ../../src/builtins/array-of.tq ../../src/builtins/array-reverse.tq ../../src/builtins/array-slice.tq ../../src/builtins/array-splice.tq ../../src/builtins/array-unshift.tq ../../src/builtins/collections.tq ../../src/builtins/data-view.tq ../../src/builtins/object.tq ../../src/builtins/object-fromentries.tq ../../src/builtins/iterator.tq ../../src/builtins/typed-array.tq ../../test/torque/test-torque.tq ../../third_party/v8/builtins/array-sort.tq ./torque.exe
+
+build obj/run_torque.stamp: stamp gen/torque-generated/builtin-definitions-from-dsl.h gen/torque-generated/builtins-base-from-dsl-gen.cc gen/torque-generated/builtins-base-from-dsl-gen.h gen/torque-generated/builtins-arguments-from-dsl-gen.cc gen/torque-generated/builtins-arguments-from-dsl-gen.h gen/torque-generated/builtins-array-from-dsl-gen.cc gen/torque-generated/builtins-array-from-dsl-gen.h gen/torque-generated/builtins-collections-from-dsl-gen.cc gen/torque-generated/builtins-collections-from-dsl-gen.h gen/torque-generated/builtins-iterator-from-dsl-gen.cc gen/torque-generated/builtins-iterator-from-dsl-gen.h gen/torque-generated/builtins-object-from-dsl-gen.cc gen/torque-generated/builtins-object-from-dsl-gen.h gen/torque-generated/builtins-typed-array-from-dsl-gen.cc gen/torque-generated/builtins-typed-array-from-dsl-gen.h gen/torque-generated/builtins-data-view-from-dsl-gen.cc gen/torque-generated/builtins-data-view-from-dsl-gen.h gen/torque-generated/builtins-test-from-dsl-gen.cc gen/torque-generated/builtins-test-from-dsl-gen.h
+subninja obj/torque.ninja
+subninja obj/torque_base.ninja
+subninja obj/torque_generated_initializers.ninja
+subninja obj/v8.ninja
+build obj/v8_archive.stamp: stamp ./d8.exe
+subninja obj/v8_base.ninja
+build obj/v8_clusterfuzz.stamp: stamp ./d8.exe
+rule ___v8_dump_build_config___build_toolchain_win_win_clang_x64__rule
+  command = C$:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../tools/testrunner/utils/dump_build_config.py v8_build_config.json "current_cpu=\"x64\"" dcheck_always_on=false is_android=false is_asan=false is_cfi=false is_component_build=true is_debug=true is_gcov_coverage=false is_msan=false is_tsan=false is_ubsan_vptr=false "target_cpu=\"x64\"" "v8_current_cpu=\"x64\"" v8_enable_i18n_support=true v8_enable_verify_predictable=false "v8_target_cpu=\"x64\"" v8_use_snapshot=true v8_enable_embedded_builtins=true v8_enable_jitless_mode=false v8_enable_verify_csa=false v8_enable_lite_mode=false
+  description = ACTION //:v8_dump_build_config(//build/toolchain/win:win_clang_x64)
+  restat = 1
+  pool = build_toolchain_action_pool
+
+build v8_build_config.json: ___v8_dump_build_config___build_toolchain_win_win_clang_x64__rule | ../../tools/testrunner/utils/dump_build_config.py
+
+build obj/v8_dump_build_config.stamp: stamp v8_build_config.json
+subninja obj/v8_external_snapshot.ninja
+subninja obj/v8_for_testing.ninja
+build obj/v8_fuzzers.stamp: stamp || ./v8_simple_json_fuzzer.exe ./v8_simple_multi_return_fuzzer.exe ./v8_simple_parser_fuzzer.exe ./v8_simple_regexp_builtins_fuzzer.exe ./v8_simple_regexp_fuzzer.exe ./v8_simple_wasm_async_fuzzer.exe ./v8_simple_wasm_code_fuzzer.exe ./v8_simple_wasm_compile_fuzzer.exe ./v8_simple_wasm_data_section_fuzzer.exe ./v8_simple_wasm_function_sigs_section_fuzzer.exe ./v8_simple_wasm_fuzzer.exe ./v8_simple_wasm_globals_section_fuzzer.exe ./v8_simple_wasm_imports_section_fuzzer.exe ./v8_simple_wasm_memory_section_fuzzer.exe ./v8_simple_wasm_names_section_fuzzer.exe ./v8_simple_wasm_types_section_fuzzer.exe
+build obj/v8_generated_cc_files.stamp: stamp obj/d8_js2c.stamp obj/generate_bytecode_builtins_list.stamp obj/js2c.stamp obj/js2c_experimental_extras.stamp obj/js2c_extras.stamp obj/run_torque.stamp obj/src/inspector/v8_generated_cc_files.stamp obj/test/cctest/v8_generated_cc_files.stamp
+subninja obj/v8_headers.ninja
+subninja obj/v8_hello_world.ninja
+subninja obj/v8_init.ninja
+subninja obj/v8_initializers.ninja
+subninja obj/v8_libbase.ninja
+subninja obj/v8_libplatform.ninja
+subninja obj/v8_libsampler.ninja
+subninja obj/v8_maybe_snapshot.ninja
+subninja obj/v8_nosnapshot.ninja
+subninja obj/v8_sample_process.ninja
+subninja obj/v8_shell.ninja
+subninja obj/v8_simple_json_fuzzer.ninja
+subninja obj/v8_simple_multi_return_fuzzer.ninja
+subninja obj/v8_simple_parser_fuzzer.ninja
+subninja obj/v8_simple_regexp_builtins_fuzzer.ninja
+subninja obj/v8_simple_regexp_fuzzer.ninja
+subninja obj/v8_simple_wasm_async_fuzzer.ninja
+subninja obj/v8_simple_wasm_code_fuzzer.ninja
+subninja obj/v8_simple_wasm_compile_fuzzer.ninja
+subninja obj/v8_simple_wasm_data_section_fuzzer.ninja
+subninja obj/v8_simple_wasm_function_sigs_section_fuzzer.ninja
+subninja obj/v8_simple_wasm_fuzzer.ninja
+subninja obj/v8_simple_wasm_globals_section_fuzzer.ninja
+subninja obj/v8_simple_wasm_imports_section_fuzzer.ninja
+subninja obj/v8_simple_wasm_memory_section_fuzzer.ninja
+subninja obj/v8_simple_wasm_names_section_fuzzer.ninja
+subninja obj/v8_simple_wasm_types_section_fuzzer.ninja
+subninja obj/v8_version.ninja
+subninja obj/wasm_async_fuzzer.ninja
+subninja obj/wasm_code_fuzzer.ninja
+subninja obj/wasm_compile_fuzzer.ninja
+subninja obj/wasm_data_section_fuzzer.ninja
+subninja obj/wasm_function_sigs_section_fuzzer.ninja
+subninja obj/wasm_fuzzer.ninja
+subninja obj/wasm_globals_section_fuzzer.ninja
+subninja obj/wasm_imports_section_fuzzer.ninja
+subninja obj/wasm_memory_section_fuzzer.ninja
+subninja obj/wasm_module_runner.ninja
+subninja obj/wasm_names_section_fuzzer.ninja
+subninja obj/wasm_types_section_fuzzer.ninja
+build obj/build/config/common_deps.stamp: stamp
+build obj/build/config/executable_deps.stamp: stamp obj/build/config/common_deps.stamp
+build obj/build/config/loadable_module_deps.stamp: stamp obj/build/config/common_deps.stamp
+build obj/build/config/shared_library_deps.stamp: stamp obj/build/config/common_deps.stamp
+build obj/build/config/sanitizers/deps.stamp: stamp
+subninja obj/build/config/sanitizers/options_sources.ninja
+rule __build_win_copy_cdb_to_output___build_toolchain_win_win_clang_x64__rule
+  command = C$:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../build/win/copy_cdb_to_output.py cdb x64
+  description = ACTION //build/win:copy_cdb_to_output(//build/toolchain/win:win_clang_x64)
+  restat = 1
+  pool = build_toolchain_action_pool
+
+build cdb/cdb.exe cdb/dbgeng.dll cdb/dbghelp.dll cdb/dbgmodel.dll cdb/winext/ext.dll cdb/winext/uext.dll cdb/winxp/exts.dll cdb/winxp/ntsdexts.dll cdb/api-ms-win-core-console-l1-1-0.dll cdb/api-ms-win-core-datetime-l1-1-0.dll cdb/api-ms-win-core-debug-l1-1-0.dll cdb/api-ms-win-core-errorhandling-l1-1-0.dll cdb/api-ms-win-core-file-l1-1-0.dll cdb/api-ms-win-core-file-l1-2-0.dll cdb/api-ms-win-core-file-l2-1-0.dll cdb/api-ms-win-core-handle-l1-1-0.dll cdb/api-ms-win-core-heap-l1-1-0.dll cdb/api-ms-win-core-interlocked-l1-1-0.dll cdb/api-ms-win-core-libraryloader-l1-1-0.dll cdb/api-ms-win-core-localization-l1-2-0.dll cdb/api-ms-win-core-memory-l1-1-0.dll cdb/api-ms-win-core-namedpipe-l1-1-0.dll cdb/api-ms-win-core-processenvironment-l1-1-0.dll cdb/api-ms-win-core-processthreads-l1-1-0.dll cdb/api-ms-win-core-processthreads-l1-1-1.dll cdb/api-ms-win-core-profile-l1-1-0.dll cdb/api-ms-win-core-rtlsupport-l1-1-0.dll cdb/api-ms-win-core-string-l1-1-0.dll cdb/api-ms-win-core-synch-l1-1-0.dll cdb/api-ms-win-core-synch-l1-2-0.dll cdb/api-ms-win-core-sysinfo-l1-1-0.dll cdb/api-ms-win-core-timezone-l1-1-0.dll cdb/api-ms-win-core-util-l1-1-0.dll cdb/api-ms-win-crt-conio-l1-1-0.dll cdb/api-ms-win-crt-convert-l1-1-0.dll cdb/api-ms-win-crt-environment-l1-1-0.dll cdb/api-ms-win-crt-filesystem-l1-1-0.dll cdb/api-ms-win-crt-heap-l1-1-0.dll cdb/api-ms-win-crt-locale-l1-1-0.dll cdb/api-ms-win-crt-math-l1-1-0.dll cdb/api-ms-win-crt-multibyte-l1-1-0.dll cdb/api-ms-win-crt-private-l1-1-0.dll cdb/api-ms-win-crt-process-l1-1-0.dll cdb/api-ms-win-crt-runtime-l1-1-0.dll cdb/api-ms-win-crt-stdio-l1-1-0.dll cdb/api-ms-win-crt-string-l1-1-0.dll cdb/api-ms-win-crt-time-l1-1-0.dll cdb/api-ms-win-crt-utility-l1-1-0.dll cdb/api-ms-win-eventing-provider-l1-1-0.dll cdb/ucrtbase.dll: __build_win_copy_cdb_to_output___build_toolchain_win_win_clang_x64__rule | ../../build/win/copy_cdb_to_output.py ../../build/win/copy_cdb_to_output.py ../../build/vs_toolchain.py
+
+build obj/build/win/copy_cdb_to_output.stamp: stamp cdb/cdb.exe cdb/dbgeng.dll cdb/dbghelp.dll cdb/dbgmodel.dll cdb/winext/ext.dll cdb/winext/uext.dll cdb/winxp/exts.dll cdb/winxp/ntsdexts.dll cdb/api-ms-win-core-console-l1-1-0.dll cdb/api-ms-win-core-datetime-l1-1-0.dll cdb/api-ms-win-core-debug-l1-1-0.dll cdb/api-ms-win-core-errorhandling-l1-1-0.dll cdb/api-ms-win-core-file-l1-1-0.dll cdb/api-ms-win-core-file-l1-2-0.dll cdb/api-ms-win-core-file-l2-1-0.dll cdb/api-ms-win-core-handle-l1-1-0.dll cdb/api-ms-win-core-heap-l1-1-0.dll cdb/api-ms-win-core-interlocked-l1-1-0.dll cdb/api-ms-win-core-libraryloader-l1-1-0.dll cdb/api-ms-win-core-localization-l1-2-0.dll cdb/api-ms-win-core-memory-l1-1-0.dll cdb/api-ms-win-core-namedpipe-l1-1-0.dll cdb/api-ms-win-core-processenvironment-l1-1-0.dll cdb/api-ms-win-core-processthreads-l1-1-0.dll cdb/api-ms-win-core-processthreads-l1-1-1.dll cdb/api-ms-win-core-profile-l1-1-0.dll cdb/api-ms-win-core-rtlsupport-l1-1-0.dll cdb/api-ms-win-core-string-l1-1-0.dll cdb/api-ms-win-core-synch-l1-1-0.dll cdb/api-ms-win-core-synch-l1-2-0.dll cdb/api-ms-win-core-sysinfo-l1-1-0.dll cdb/api-ms-win-core-timezone-l1-1-0.dll cdb/api-ms-win-core-util-l1-1-0.dll cdb/api-ms-win-crt-conio-l1-1-0.dll cdb/api-ms-win-crt-convert-l1-1-0.dll cdb/api-ms-win-crt-environment-l1-1-0.dll cdb/api-ms-win-crt-filesystem-l1-1-0.dll cdb/api-ms-win-crt-heap-l1-1-0.dll cdb/api-ms-win-crt-locale-l1-1-0.dll cdb/api-ms-win-crt-math-l1-1-0.dll cdb/api-ms-win-crt-multibyte-l1-1-0.dll cdb/api-ms-win-crt-private-l1-1-0.dll cdb/api-ms-win-crt-process-l1-1-0.dll cdb/api-ms-win-crt-runtime-l1-1-0.dll cdb/api-ms-win-crt-stdio-l1-1-0.dll cdb/api-ms-win-crt-string-l1-1-0.dll cdb/api-ms-win-crt-time-l1-1-0.dll cdb/api-ms-win-crt-utility-l1-1-0.dll cdb/api-ms-win-eventing-provider-l1-1-0.dll cdb/ucrtbase.dll
+subninja obj/build/win/default_exe_manifest.ninja
+build obj/build/win/runtime_libs.stamp: stamp
+subninja obj/src/inspector/inspector.ninja
+rule __src_inspector_protocol_compatibility___build_toolchain_win_win_clang_x64__rule
+  command = C$:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../third_party/inspector_protocol/check_protocol_compatibility.py --stamp gen/src/inspector/js_protocol.stamp ../../src/inspector/js_protocol.pdl
+  description = ACTION //src/inspector:protocol_compatibility(//build/toolchain/win:win_clang_x64)
+  restat = 1
+  pool = build_toolchain_action_pool
+
+build gen/src/inspector/js_protocol.stamp: __src_inspector_protocol_compatibility___build_toolchain_win_win_clang_x64__rule | ../../third_party/inspector_protocol/check_protocol_compatibility.py ../../src/inspector/js_protocol.pdl
+
+build obj/src/inspector/protocol_compatibility.stamp: stamp gen/src/inspector/js_protocol.stamp
+rule __src_inspector_protocol_generated_sources___build_toolchain_win_win_clang_x64__rule
+  command = C$:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../third_party/inspector_protocol/code_generator.py --jinja_dir ../../third_party/ --output_base gen/src/inspector --config ../../src/inspector/inspector_protocol_config.json
+  description = ACTION //src/inspector:protocol_generated_sources(//build/toolchain/win:win_clang_x64)
+  restat = 1
+  pool = build_toolchain_action_pool
+
+build gen/src/inspector/protocol/Forward.h gen/src/inspector/protocol/Protocol.cpp gen/src/inspector/protocol/Protocol.h gen/src/inspector/protocol/Console.cpp gen/src/inspector/protocol/Console.h gen/src/inspector/protocol/Debugger.cpp gen/src/inspector/protocol/Debugger.h gen/src/inspector/protocol/HeapProfiler.cpp gen/src/inspector/protocol/HeapProfiler.h gen/src/inspector/protocol/Profiler.cpp gen/src/inspector/protocol/Profiler.h gen/src/inspector/protocol/Runtime.cpp gen/src/inspector/protocol/Runtime.h gen/src/inspector/protocol/Schema.cpp gen/src/inspector/protocol/Schema.h gen/include/inspector/Debugger.h gen/include/inspector/Runtime.h gen/include/inspector/Schema.h: __src_inspector_protocol_generated_sources___build_toolchain_win_win_clang_x64__rule | ../../third_party/inspector_protocol/code_generator.py ../../src/inspector/inspector_protocol_config.json ../../third_party/inspector_protocol/lib/Allocator_h.template ../../third_party/inspector_protocol/lib/Array_h.template ../../third_party/inspector_protocol/lib/DispatcherBase_cpp.template ../../third_party/inspector_protocol/lib/DispatcherBase_h.template ../../third_party/inspector_protocol/lib/ErrorSupport_cpp.template ../../third_party/inspector_protocol/lib/ErrorSupport_h.template ../../third_party/inspector_protocol/lib/Forward_h.template ../../third_party/inspector_protocol/lib/FrontendChannel_h.template ../../third_party/inspector_protocol/lib/Maybe_h.template ../../third_party/inspector_protocol/lib/Object_cpp.template ../../third_party/inspector_protocol/lib/Object_h.template ../../third_party/inspector_protocol/lib/Parser_cpp.template ../../third_party/inspector_protocol/lib/Parser_h.template ../../third_party/inspector_protocol/lib/Protocol_cpp.template ../../third_party/inspector_protocol/lib/ValueConversions_h.template ../../third_party/inspector_protocol/lib/Values_cpp.template ../../third_party/inspector_protocol/lib/Values_h.template ../../third_party/inspector_protocol/templates/Exported_h.template ../../third_party/inspector_protocol/templates/Imported_h.template ../../third_party/inspector_protocol/templates/TypeBuilder_cpp.template ../../third_party/inspector_protocol/templates/TypeBuilder_h.template ../../src/inspector/js_protocol.pdl ../../src/inspector/inspector_protocol_config.json obj/src/inspector/protocol_compatibility.stamp
+
+build obj/src/inspector/protocol_generated_sources.stamp: stamp gen/src/inspector/protocol/Forward.h gen/src/inspector/protocol/Protocol.cpp gen/src/inspector/protocol/Protocol.h gen/src/inspector/protocol/Console.cpp gen/src/inspector/protocol/Console.h gen/src/inspector/protocol/Debugger.cpp gen/src/inspector/protocol/Debugger.h gen/src/inspector/protocol/HeapProfiler.cpp gen/src/inspector/protocol/HeapProfiler.h gen/src/inspector/protocol/Profiler.cpp gen/src/inspector/protocol/Profiler.h gen/src/inspector/protocol/Runtime.cpp gen/src/inspector/protocol/Runtime.h gen/src/inspector/protocol/Schema.cpp gen/src/inspector/protocol/Schema.h gen/include/inspector/Debugger.h gen/include/inspector/Runtime.h gen/include/inspector/Schema.h
+build obj/src/inspector/v8_generated_cc_files.stamp: stamp obj/src/inspector/protocol_generated_sources.stamp
+build obj/test/gn_all.stamp: stamp ./inspector-test.exe ./mkgrokdump.exe ./cctest.exe ./generate-bytecode-expectations.exe ./unittests.exe || obj/test/benchmarks/v8_benchmarks.stamp obj/test/intl/v8_intl.stamp obj/test/fuzzer/v8_fuzzer.stamp obj/test/message/v8_message.stamp obj/test/mjsunit/v8_mjsunit.stamp obj/test/mozilla/v8_mozilla.stamp obj/test/preparser/v8_preparser.stamp obj/test/test262/v8_test262.stamp obj/test/wasm-js/v8_wasm_js.stamp obj/test/wasm-spec-tests/v8_wasm_spec_tests.stamp obj/test/webkit/v8_webkit.stamp
+build obj/test/v8_bot_default.stamp: stamp || ./cctest.exe obj/test/debugger/v8_debugger.stamp obj/test/fuzzer/v8_fuzzer.stamp ./inspector-test.exe obj/test/intl/v8_intl.stamp obj/test/message/v8_message.stamp obj/test/mjsunit/v8_mjsunit.stamp ./mkgrokdump.exe obj/test/preparser/v8_preparser.stamp ./unittests.exe obj/test/wasm-js/v8_wasm_js.stamp obj/test/wasm-spec-tests/v8_wasm_spec_tests.stamp obj/test/webkit/v8_webkit.stamp
+build obj/test/v8_d8_default.stamp: stamp || obj/test/debugger/v8_debugger.stamp obj/test/intl/v8_intl.stamp obj/test/message/v8_message.stamp obj/test/mjsunit/v8_mjsunit.stamp obj/test/preparser/v8_preparser.stamp obj/test/webkit/v8_webkit.stamp
+build obj/test/v8_default.stamp: stamp || ./cctest.exe obj/test/debugger/v8_debugger.stamp obj/test/fuzzer/v8_fuzzer.stamp ./inspector-test.exe obj/test/intl/v8_intl.stamp obj/test/message/v8_message.stamp obj/test/mjsunit/v8_mjsunit.stamp ./mkgrokdump.exe obj/test/preparser/v8_preparser.stamp ./unittests.exe obj/test/wasm-js/v8_wasm_js.stamp obj/test/wasm-spec-tests/v8_wasm_spec_tests.stamp
+build obj/test/v8_optimize_for_size.stamp: stamp || ./cctest.exe obj/test/debugger/v8_debugger.stamp ./inspector-test.exe obj/test/intl/v8_intl.stamp obj/test/mjsunit/v8_mjsunit.stamp obj/test/webkit/v8_webkit.stamp
+build obj/test/v8_perf.stamp: stamp || ./cctest.exe ./d8.exe obj/tools/v8_android_test_runner_deps.stamp
+build obj/test/v8_run_num_fuzzer.stamp: stamp || obj/test/benchmarks/v8_benchmarks.stamp obj/test/mjsunit/v8_mjsunit.stamp obj/test/webkit/v8_webkit.stamp
+build obj/test/benchmarks/v8_benchmarks.stamp: stamp || ./d8.exe obj/tools/v8_testrunner.stamp
+subninja obj/test/cctest/cctest.ninja
+subninja obj/test/cctest/cctest_sources.ninja
+subninja obj/test/cctest/generate-bytecode-expectations.ninja
+rule __test_cctest_resources___build_toolchain_win_win_clang_x64__rule
+  command = C$:/Users/sk100277/development/v8/depot_tools/win_tools-2_7_6_bin/python/bin/python.exe ../../tools/js2c.py gen/test/cctest/resources.cc TEST ../../tools/splaytree.js ../../tools/codemap.js ../../tools/csvparser.js ../../tools/consarray.js ../../tools/profile.js ../../tools/profile_view.js ../../tools/arguments.js ../../tools/logreader.js ../../test/cctest/log-eq-of-logging-and-traversal.js
+  description = ACTION //test/cctest:resources(//build/toolchain/win:win_clang_x64)
+  restat = 1
+  pool = build_toolchain_action_pool
+
+build gen/test/cctest/resources.cc: __test_cctest_resources___build_toolchain_win_win_clang_x64__rule | ../../tools/js2c.py ../../tools/jsmin.py ../../tools/splaytree.js ../../tools/codemap.js ../../tools/csvparser.js ../../tools/consarray.js ../../tools/profile.js ../../tools/profile_view.js ../../tools/arguments.js ../../tools/logreader.js ../../test/cctest/log-eq-of-logging-and-traversal.js
+
+build obj/test/cctest/resources.stamp: stamp gen/test/cctest/resources.cc
+build obj/test/cctest/v8_generated_cc_files.stamp: stamp obj/test/cctest/resources.stamp
+build obj/test/debugger/v8_debugger.stamp: stamp || ./d8.exe obj/tools/v8_testrunner.stamp
+build obj/test/fuzzer/v8_fuzzer.stamp: stamp || obj/tools/v8_testrunner.stamp obj/v8_fuzzers.stamp
+subninja obj/test/inspector/inspector-test.ninja
+build obj/test/intl/v8_intl.stamp: stamp || ./d8.exe obj/tools/v8_testrunner.stamp
+build obj/test/message/v8_message.stamp: stamp || ./d8.exe obj/tools/v8_testrunner.stamp
+build obj/test/mjsunit/v8_mjsunit.stamp: stamp || ./d8.exe obj/tools/v8_testrunner.stamp
+subninja obj/test/mkgrokdump/mkgrokdump.ninja
+build obj/test/mozilla/v8_mozilla.stamp: stamp || ./d8.exe obj/tools/v8_testrunner.stamp
+build obj/test/preparser/v8_preparser.stamp: stamp || ./d8.exe obj/tools/v8_testrunner.stamp
+build obj/test/test262/v8_test262.stamp: stamp || ./d8.exe obj/tools/v8_testrunner.stamp
+subninja obj/test/unittests/unittests.ninja
+subninja obj/test/unittests/unittests_sources.ninja
+build obj/test/wasm-js/v8_wasm_js.stamp: stamp || ./d8.exe obj/tools/v8_testrunner.stamp
+build obj/test/wasm-spec-tests/v8_wasm_spec_tests.stamp: stamp || ./d8.exe obj/tools/v8_testrunner.stamp
+build obj/test/webkit/v8_webkit.stamp: stamp || ./d8.exe obj/tools/v8_testrunner.stamp
+subninja obj/testing/gmock/gmock.ninja
+subninja obj/testing/gmock/gmock_main.ninja
+subninja obj/testing/gtest/gtest.ninja
+subninja obj/testing/gtest/gtest_main.ninja
+subninja obj/third_party/googletest/gmock.ninja
+subninja obj/third_party/googletest/gmock_main.ninja
+subninja obj/third_party/googletest/gtest.ninja
+subninja obj/third_party/googletest/gtest_main.ninja
+build obj/third_party/icu/icu.stamp: stamp ./icui18n.dll.lib ./icuuc.dll.lib
+build icudtl.dat: copy ../../third_party/icu/common/icudtl.dat
+
+build obj/third_party/icu/icudata.stamp: stamp icudtl.dat
+subninja obj/third_party/icu/icui18n.ninja
+subninja obj/third_party/icu/icuuc.ninja
+build obj/tools/gn_all.stamp: stamp || obj/tools/v8_check_static_initializers.stamp obj/tools/gcmole/v8_run_gcmole.stamp obj/tools/jsfunfuzz/v8_jsfunfuzz.stamp
+build obj/tools/v8_android_test_runner_deps.stamp: stamp
+build obj/tools/v8_check_static_initializers.stamp: stamp || ./d8.exe
+build obj/tools/v8_testrunner.stamp: stamp || obj/v8_dump_build_config.stamp obj/tools/v8_android_test_runner_deps.stamp
+build obj/tools/gcmole/v8_run_gcmole.stamp: stamp obj/run_torque.stamp
+build obj/tools/jsfunfuzz/v8_jsfunfuzz.stamp: stamp || ./d8.exe

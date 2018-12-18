@@ -1,0 +1,90 @@
+ prologue%
+(function(a,b,c){
+"use strict";
+%CheckIsBootstrapping();
+var d=(void 0);
+var e=%ExportFromRuntime({});
+function Export(f){
+f(e);
+}
+function Import(f){
+f.next=d;
+d=f;
+}
+function ImportNow(g){
+return e[g];
+}
+var h=a.Array;
+function PostNatives(b){
+%CheckIsBootstrapping();
+var i=ImportNow("iterator_symbol");
+var j=ImportNow("unscopables_symbol");
+var k={
+__proto__:null,
+copyWithin:true,
+entries:true,
+fill:true,
+find:true,
+findIndex:true,
+includes:true,
+keys:true,
+};
+%ToFastProperties(k);
+%AddNamedProperty(h.prototype,j,k,
+2|1);
+var l=h.prototype.entries;
+var m=h.prototype.forEach;
+var n=h.prototype.keys;
+var o=h.prototype[i];
+%InstallToContext([
+"array_entries_iterator",l,
+"array_for_each_iterator",m,
+"array_keys_iterator",n,
+"array_values_iterator",o,
+]);
+for(;!(d===(void 0));d=d.next){
+d(e);
+}
+e=(void 0);
+b.Export=(void 0);
+b.Import=(void 0);
+b.ImportNow=(void 0);
+b.PostNatives=(void 0);
+}
+%OptimizeObjectForAddingMultipleProperties(b,14);
+b.Import=Import;
+b.ImportNow=ImportNow;
+b.Export=Export;
+b.PostNatives=PostNatives;
+%ToFastProperties(b);
+%OptimizeObjectForAddingMultipleProperties(c,11);
+c.logStackTrace=function logStackTrace(){
+%DebugTrace();
+};
+c.log=function log(){
+let message='';
+for(const arg of arguments){
+message+=arg;
+}
+%GlobalPrint(message);
+};
+c.createPrivateSymbol=function createPrivateSymbol(g){
+return %CreatePrivateSymbol(g);
+};
+c.uncurryThis=function uncurryThis(p){
+return function(thisArg,...args){
+return %reflect_apply(p,thisArg,args);
+};
+};
+c.markPromiseAsHandled=function markPromiseAsHandled(q){
+%PromiseMarkAsHandled(q);
+};
+c.promiseState=function promiseState(q){
+return %PromiseStatus(q);
+};
+c.kPROMISE_PENDING=0;
+c.kPROMISE_FULFILLED=1;
+c.kPROMISE_REJECTED=2;
+%ToFastProperties(c);
+})
+

@@ -1,0 +1,5 @@
+is_debug = true
+target_cpu = "x64"
+v8_enable_backtrace = true
+v8_enable_slow_dchecks = true
+v8_optimized_debug = false

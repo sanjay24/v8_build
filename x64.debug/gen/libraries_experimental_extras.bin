@@ -1,0 +1,10 @@
+\test-experimental-extrae
+(function (global, binding) {
+'use strict';
+binding.testExperimentalExtraShouldReturnTen = function () {
+return 10;
+};
+binding.testExperimentalExtraShouldCallToRuntime = function() {
+return binding.runtime(3);
+};
+})
